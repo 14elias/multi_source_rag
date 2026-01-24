@@ -1,4 +1,7 @@
 import streamlit as st
+import tempfile
+
+from helper import document_loader
 
 st.title("Multi Rag App")
 
@@ -7,8 +10,14 @@ query = st.text_input("Ask a question")
 
 if uploaded_file is not None:
     st.write('File Name', uploaded_file.name)
-    st.write('File type', uploaded_file.type)
-    st.write('File size(bytes)', uploaded_file.size)
+    file_type = uploaded_file.type
 
-if query:
-    st.write("user query", query)
+    with tempfile.NamedTemporaryFile(delete=False, suffix=uploaded_file.name) as tmp:
+        tmp.write(uploaded_file.read())
+        file_path = tmp.name
+
+    documents = document_loader.load(source=file_path, source_type=file_type)
+    
+    for i, doc in enumerate(documents):
+        st.markdown(f"### Page {i + 1}")
+        st.text(doc.page_content[:3000])
