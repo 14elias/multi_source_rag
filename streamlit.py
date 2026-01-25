@@ -2,6 +2,7 @@ import streamlit as st
 import tempfile
 
 from helper import document_loader
+from splitter import splitter
 
 
 st.title("Multi Rag App")
@@ -27,6 +28,8 @@ def run_streamlit():
             documents = document_loader.load(source=file_path, source_type=file_type)
             
             for i, doc in enumerate(documents):
+                chunk = splitter(documents)
+                print(chunk)
                 st.markdown(f"### Page {i + 1}")
                 st.text(doc.page_content[:3000])
 
