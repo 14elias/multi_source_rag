@@ -10,6 +10,9 @@ from helper import document_loader
 from splitter import splitter
 from embedding import embed, retrieve
 from query_constructor import build_llm_prompt
+from .graph import ingestion, client, indexes
+from graph_retriver import graph_search
+from qa_service import answer_question
 
 
 
@@ -53,8 +56,12 @@ def run_streamlit():
             documents =document_loader.load(source=url, source_type="web")
 
     if documents:
-        chunks = splitter(documents)
+        chunks = splitter(documents[:3])
         vectore_store = embed(chunks=chunks)
+        ingestion.ingest_graph(chunks)
+
+        graph = client.get_graph()
+        indexes.create_entity_index(graph)
 
     if query:
         retrieved_result = retrieve(
@@ -65,11 +72,15 @@ def run_streamlit():
         context=''
         for retrieved in retrieved_result:
             context += retrieved.page_content
+        
+        structured_result = graph_search(query)
 
-        prompt = build_llm_prompt(context=context, query=query)
+        context += structured_result
+        
 
-        result = model.invoke(prompt)
-        st.write(result.content)
+        result = answer_question(context= context, question= query)
+    
+        st.write(result)
 
 
 run_streamlit()
