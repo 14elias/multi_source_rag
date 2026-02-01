@@ -9,10 +9,10 @@ from dotenv import load_dotenv
 from helper import document_loader
 from splitter import splitter
 from embedding import embed, retrieve
-from query_constructor import build_llm_prompt
-from .graph import ingestion, client, indexes
+from graph import ingestion, client, indexes
 from graph_retriver import graph_search
 from qa_service import answer_question
+from model import get_llm
 
 
 
@@ -25,11 +25,7 @@ source_mode = st.selectbox(
 
 query = st.text_input("Ask a question")
 
-model = ChatOpenAI(
-    model="gpt-4o-mini",
-    api_key=os.getenv('API_KEY'),
-    base_url="https://openrouter.ai/api/v1"
-)
+model = get_llm()
 
 
 documents = []
@@ -56,7 +52,7 @@ def run_streamlit():
             documents =document_loader.load(source=url, source_type="web")
 
     if documents:
-        chunks = splitter(documents[:3])
+        chunks = splitter(documents)
         vectore_store = embed(chunks=chunks)
         ingestion.ingest_graph(chunks)
 

@@ -1,6 +1,7 @@
 from langchain_huggingface import HuggingFaceEndpointEmbeddings
 from dotenv import load_dotenv
 from langchain_chroma import Chroma
+from settings import settings
 import os
 
 load_dotenv()
@@ -12,7 +13,7 @@ def embed(chunks):
     embedding=HuggingFaceEndpointEmbeddings(
         model=model,
         task="feature-extraction",
-        huggingfacehub_api_token=os.getenv('HUGGING_API_KEY'),
+        huggingfacehub_api_token=settings.HUGGING_API_KEY,
     )
 
     vector_store = Chroma.from_documents(

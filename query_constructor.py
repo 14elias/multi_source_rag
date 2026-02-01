@@ -41,3 +41,13 @@ Question:
 
 Answer:
 """.strip()
+
+
+from langchain_core.prompts import ChatPromptTemplate
+
+ENTITY_PROMPT = ChatPromptTemplate.from_messages(
+    [
+        ("system", "You extract person and organization entities."),
+        ("human", "Extract entities from: {question}")
+    ]
+)

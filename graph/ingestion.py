@@ -1,6 +1,6 @@
 from langchain_experimental.graph_transformers import LLMGraphTransformer
-from ..model import get_llm
-from .client import get_graph
+from model import get_llm
+from graph.client import get_graph
 
 def ingest_graph(documents):
     graph = get_graph()
