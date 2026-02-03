@@ -8,11 +8,12 @@ from dotenv import load_dotenv
 
 from helper import document_loader
 from splitter import splitter
-from embedding import embed, retrieve
+from embedding import embed, retrieve, load_vector_store
 from graph import ingestion, client, indexes
 from graph_retriver import graph_search
 from qa_service import answer_question
 from model import get_llm
+from hybrid_retriever import hybrid_retrieve
 
 
 
@@ -53,25 +54,19 @@ def run_streamlit():
 
     if documents:
         chunks = splitter(documents)
-        vectore_store = embed(chunks=chunks)
-        ingestion.ingest_graph(chunks)
-
-        graph = client.get_graph()
-        indexes.create_entity_index(graph)
+        embed(chunks=chunks)
 
     if query:
-        retrieved_result = retrieve(
-            query= query,
-            vector_store= vectore_store
+        vectore_store=load_vector_store()
+        retrieved_result = hybrid_retrieve(
+            query=query,
+            vectore_store=vectore_store,
+            docs=chunks
         )
 
         context=''
         for retrieved in retrieved_result:
             context += retrieved.page_content
-        
-        structured_result = graph_search(query)
-
-        context += structured_result
         
 
         result = answer_question(context= context, question= query)

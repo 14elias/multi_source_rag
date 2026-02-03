@@ -19,16 +19,28 @@ def embed(chunks):
     vector_store = Chroma.from_documents(
         documents=chunks,
         embedding=embedding,
-        collection_name="source-aware-rag"
+        collection_name="source-aware-rag",
+        persist_directory="./chroma_db"
     )
 
+    
     return vector_store
 
 
-def retrieve(query: str, vector_store: Chroma):
-    retrieved_docs = vector_store.similarity_search(
-        query=query,
-        k=3
+def load_vector_store():
+    embedding = HuggingFaceEndpointEmbeddings(
+        model="sentence-transformers/all-mpnet-base-v2",
+        task="feature-extraction",
+        huggingfacehub_api_token=settings.HUGGING_API_KEY,
     )
 
-    return retrieved_docs
+    return Chroma(
+        persist_directory="./chroma_db",
+        collection_name="source-aware-rag",
+        embedding_function=embedding
+    )
+
+
+
+def retrieve(query: str, vector_store: Chroma):
+    return vector_store.as_retriever(search_kwargs={"k": 3})
